@@ -1,0 +1,26 @@
+/* =========================================================
+   PHARMAGEST — Responsive
+   ========================================================= */
+
+@media (max-width: 768px) {
+    .topbar-toggle {
+        display: inline-block;
+    }
+
+    .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        transform: translateX(-100%);
+        z-index: 1000;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .app-layout {
+        position: relative;
+    }
+}
