@@ -5,14 +5,16 @@ $current_page = basename($_SERVER['PHP_SELF']);
 <aside class="sidebar" id="sidebar">
     <span class="sidebar-brand">💊 PharmaGest</span>
     <ul class="sidebar-nav">
-        <li><a href="/dashboard/index.php" class="<?= $current_page === 'index.php' ? 'active' : '' ?>">📊 Dashboard</a></li>
-        <li><a href="/medicaments/index.php">💊 Médicaments</a></li>
-        <li><a href="/stock/index.php">📦 Stock</a></li>
-        <li><a href="/fournisseurs/index.php">🚚 Fournisseurs</a></li>
-        <li><a href="/approvisionnements/index.php">📥 Achats</a></li>
-        <li><a href="/ventes/index.php">🧾 Ventes</a></li>
-        <li><a href="/clients/index.php">👥 Clients</a></li>
-        <li><a href="/utilisateurs/index.php">🔐 Utilisateurs</a></li>
-        <li><a href="/rapports/index.php">📈 Rapports</a></li>
+        <li><a href="/dashboard/index.php" class="<?= $current_page === 'index.php' && str_contains($_SERVER['REQUEST_URI'], '/dashboard/') ? 'active' : '' ?>">📊 Dashboard</a></li>
+        <li><a href="/medicaments/index.php" class="<?= str_contains($_SERVER['REQUEST_URI'], '/medicaments/') ? 'active' : '' ?>">💊 Médicaments</a></li>
+        <li><a href="/conditionnements/index.php" class="<?= str_contains($_SERVER['REQUEST_URI'], '/conditionnements/') ? 'active' : '' ?>">🏷️ Conditionnements</a></li>
+        <li><a href="/lots/index.php" class="<?= str_contains($_SERVER['REQUEST_URI'], '/lots/') ? 'active' : '' ?>">📋 Lots</a></li>
+        <li><a href="/stock/index.php" class="<?= str_contains($_SERVER['REQUEST_URI'], '/stock/') ? 'active' : '' ?>">📦 Stock</a></li>
+        <li><a href="/fournisseurs/index.php" class="<?= str_contains($_SERVER['REQUEST_URI'], '/fournisseurs/') ? 'active' : '' ?>">🚚 Fournisseurs</a></li>
+        <li><a href="/approvisionnements/index.php" class="<?= str_contains($_SERVER['REQUEST_URI'], '/approvisionnements/') ? 'active' : '' ?>">📥 Achats</a></li>
+        <li><a href="/ventes/index.php" class="<?= str_contains($_SERVER['REQUEST_URI'], '/ventes/') ? 'active' : '' ?>">🧾 Ventes</a></li>
+        <li><a href="/clients/index.php" class="<?= str_contains($_SERVER['REQUEST_URI'], '/clients/') ? 'active' : '' ?>">👥 Clients</a></li>
+        <li><a href="/utilisateurs/index.php" class="<?= str_contains($_SERVER['REQUEST_URI'], '/utilisateurs/') ? 'active' : '' ?>">🔐 Utilisateurs</a></li>
+        <li><a href="/rapports/index.php" class="<?= str_contains($_SERVER['REQUEST_URI'], '/rapports/') ? 'active' : '' ?>">📈 Rapports</a></li>
     </ul>
 </aside>

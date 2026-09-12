@@ -5,10 +5,11 @@ requireConnexion();
 
 $recherche = trim($_GET['q'] ?? '');
 
-$sql = 'SELECT c.*, m.nom AS medicament_nom, u.symbole AS unite_symbole
+$sql = "SELECT c.*, m.nom AS medicament_nom, u.symbole AS unite_symbole,
+        (SELECT AVG(l.prix_achat_base) FROM lots l WHERE l.id_medicament = c.id_medicament AND l.statut = 'actif') AS prix_achat_moyen
         FROM conditionnements c
         JOIN medicaments m ON m.id_medicament = c.id_medicament
-        JOIN unites u ON u.id_unite = c.id_unite';
+        JOIN unites u ON u.id_unite = c.id_unite";
 
 if ($recherche !== '') {
     $sql .= ' WHERE m.nom LIKE ? OR c.libelle LIKE ?';
@@ -57,21 +58,56 @@ $conditionnements = $stmt->fetchAll();
                                 <th>Unité</th>
                                 <th>Qté de base</th>
                                 <th>Prix de vente</th>
+                                <th>Coût d'achat estimé</th>
+                                <th>Marge estimée</th>
                                 <th>Statut</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (empty($conditionnements)): ?>
-                                <tr><td colspan="7">Aucun conditionnement trouvé.</td></tr>
+                                <tr><td colspan="9">Aucun conditionnement trouvé.</td></tr>
                             <?php else: ?>
                                 <?php foreach ($conditionnements as $c): ?>
+                                    <?php
+                                        $coutAchat = null;
+                                        $marge = null;
+                                        $margePourcent = null;
+
+                                        if ($c['prix_achat_moyen'] !== null) {
+                                            $coutAchat = $c['prix_achat_moyen'] * $c['quantite_base'];
+                                            $marge = $c['prix_vente'] - $coutAchat;
+                                            $margePourcent = $coutAchat > 0 ? ($marge / $coutAchat) * 100 : null;
+                                        }
+                                    ?>
                                     <tr>
                                         <td><?= htmlspecialchars($c['medicament_nom']) ?></td>
                                         <td><?= htmlspecialchars($c['libelle']) ?></td>
                                         <td><?= htmlspecialchars($c['unite_symbole']) ?></td>
                                         <td><?= (int)$c['quantite_base'] ?></td>
                                         <td><?= number_format($c['prix_vente'], 0, ',', ' ') ?> Ar</td>
+                                        <td>
+                                            <?php if ($coutAchat !== null): ?>
+                                                <?= number_format($coutAchat, 0, ',', ' ') ?> Ar
+                                            <?php else: ?>
+                                                <span style="color:var(--color-text-muted);">— (aucun lot)</span>
+                                            <?php endif; ?>
+                                        </td>
+                                        <td>
+                                            <?php if ($marge !== null): ?>
+                                                <?php
+                                                    $classeMarge = $marge > 0 ? 'badge-success' : ($marge === 0 ? 'badge-warning' : 'badge-danger');
+                                                ?>
+                                                <span class="badge <?= $classeMarge ?>">
+                                                    <?= number_format($marge, 0, ',', ' ') ?> Ar
+                                                    <?php if ($margePourcent !== null): ?>
+                                                        (<?= number_format($margePourcent, 0) ?>%)
+                                                    <?php endif; ?>
+                                                </span>
+                                            <?php else: ?>
+                                                <span style="color:var(--color-text-muted);">—</span>
+                                            <?php endif; ?>
+                                        </td>
                                         <td>
                                             <?php if ($c['statut'] === 'actif'): ?>
                                                 <span class="badge badge-success">Actif</span>

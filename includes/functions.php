@@ -59,3 +59,16 @@ function getLotsExpirationProche(PDO $pdo, int $joursSeuil = 30): array
     $stmt->execute([$joursSeuil]);
     return $stmt->fetchAll();
 }
+
+/**
+ * Génère un numéro de vente unique du type VENTE-2026-0001
+ */
+function genererNumeroVente(PDO $pdo): string
+{
+    $annee = date('Y');
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM ventes WHERE numero_vente LIKE ?");
+    $stmt->execute(["VENTE-$annee-%"]);
+    $compteur = (int)$stmt->fetchColumn() + 1;
+
+    return sprintf('VENTE-%s-%04d', $annee, $compteur);
+}

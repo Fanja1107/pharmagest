@@ -37,18 +37,19 @@ $approvisionnements = $pdo->query($sql)->fetchAll();
                 <div class="table-wrapper">
                     <table class="data-table">
                         <thead>
-                            <tr>
+                                                        <tr>
                                 <th>N° achat</th>
                                 <th>Fournisseur</th>
                                 <th>Date</th>
                                 <th>Total</th>
                                 <th>Créé par</th>
                                 <th>Statut</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (empty($approvisionnements)): ?>
-                                <tr><td colspan="6">Aucun approvisionnement trouvé.</td></tr>
+                                <tr><td colspan="7">Aucun approvisionnement trouvé.</td></tr>
                             <?php else: ?>
                                 <?php foreach ($approvisionnements as $a): ?>
                                     <tr>
@@ -67,6 +68,9 @@ $approvisionnements = $pdo->query($sql)->fetchAll();
                                                 };
                                             ?>
                                             <span class="badge <?= $badgeClass ?>"><?= ucfirst($a['statut']) ?></span>
+                                        </td>
+                                        <td class="actions-cell">
+                                            <a href="/approvisionnements/voir.php?id=<?= $a['id_approvisionnement'] ?>" class="btn btn-outline btn-sm">Voir</a>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
