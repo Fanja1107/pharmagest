@@ -232,3 +232,25 @@ LEFT JOIN lots l ON l.id_medicament = m.id_medicament
 GROUP BY m.id_medicament, m.reference, m.nom, m.dosage, m.seuil_alerte, m.statut;
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+-- ---------------------------------------------------------
+-- VUE : suivi des expirations par lot
+-- ---------------------------------------------------------
+CREATE VIEW vue_expirations AS
+SELECT
+    l.id_lot,
+    l.numero_lot,
+    m.id_medicament,
+    m.nom AS medicament_nom,
+    l.date_expiration,
+    DATEDIFF(l.date_expiration, CURDATE()) AS jours_restants,
+    l.quantite_base,
+    l.statut
+FROM lots l
+JOIN medicaments m ON m.id_medicament = l.id_medicament
+ORDER BY l.date_expiration ASC;
+
+ALTER TABLE approvisionnement_details
+    ADD COLUMN numero_lot VARCHAR(50) NULL AFTER quantite_base,
+    ADD COLUMN date_fabrication DATE NULL AFTER numero_lot,
+    ADD COLUMN date_expiration DATE NULL AFTER date_fabrication;

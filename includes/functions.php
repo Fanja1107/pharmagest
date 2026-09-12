@@ -28,6 +28,21 @@ function mettreAJourStatutsLots(PDO $pdo): void
 }
 
 /**
+ * Génère un numéro d'approvisionnement unique du type APPRO-2026-0001
+ */
+function genererNumeroAppro(PDO $pdo): string
+{
+    $annee = date('Y');
+    $stmt = $pdo->prepare(
+        "SELECT COUNT(*) FROM approvisionnements WHERE numero_appro LIKE ?"
+    );
+    $stmt->execute(["APPRO-$annee-%"]);
+    $compteur = (int)$stmt->fetchColumn() + 1;
+
+    return sprintf('APPRO-%s-%04d', $annee, $compteur);
+}
+
+/**
  * Retourne les lots actifs qui expirent bientôt (par défaut, dans les 30 prochains jours).
  */
 function getLotsExpirationProche(PDO $pdo, int $joursSeuil = 30): array

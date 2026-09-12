@@ -22,7 +22,9 @@ if ($recherche !== '') {
     $params[] = '%' . $recherche . '%';
 }
 
-if ($statutFiltre !== '' && in_array($statutFiltre, ['actif', 'expire', 'epuise'], true)) {
+if ($statutFiltre === 'proche_expiration') {
+    $sql .= " AND l.statut = 'actif' AND DATEDIFF(l.date_expiration, CURDATE()) BETWEEN 0 AND 30";
+} elseif ($statutFiltre !== '' && in_array($statutFiltre, ['actif', 'expire', 'epuise'], true)) {
     $sql .= ' AND l.statut = ?';
     $params[] = $statutFiltre;
 }
@@ -69,6 +71,7 @@ $lots = $stmt->fetchAll();
                         <select name="statut" id="filtreStatut" class="filtre-statut" onchange="document.getElementById('formRecherche').submit()">
                             <option value="">Tous les statuts</option>
                             <option value="actif" <?= $statutFiltre === 'actif' ? 'selected' : '' ?>>Actif</option>
+                            <option value="proche_expiration" <?= $statutFiltre === 'proche_expiration' ? 'selected' : '' ?>>Expiration proche (≤30j)</option>
                             <option value="expire" <?= $statutFiltre === 'expire' ? 'selected' : '' ?>>Expiré</option>
                             <option value="epuise" <?= $statutFiltre === 'epuise' ? 'selected' : '' ?>>Épuisé</option>
                         </select>
