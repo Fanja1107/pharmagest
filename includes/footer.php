@@ -9,7 +9,6 @@
         });
     }
 
-    // Affiche les messages transmis en session (succès/erreur après redirection)
     <?php if (!empty($_SESSION['flash_success'])): ?>
         alertSuccess(<?= json_encode($_SESSION['flash_success']) ?>);
         <?php unset($_SESSION['flash_success']); ?>
@@ -17,5 +16,9 @@
     <?php if (!empty($_SESSION['flash_error'])): ?>
         alertError(<?= json_encode($_SESSION['flash_error']) ?>);
         <?php unset($_SESSION['flash_error']); ?>
+    <?php endif; ?>
+    <?php if (!empty($_SESSION['flash_warning'])): ?>
+        alertWarning(<?= json_encode($_SESSION['flash_warning']) ?>);
+        <?php unset($_SESSION['flash_warning']); ?>
     <?php endif; ?>
 </script>

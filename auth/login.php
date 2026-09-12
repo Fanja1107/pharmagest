@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$email]);
         $utilisateur = $stmt->fetch();
 
-        if ($utilisateur && password_verify($motDePasse, $utilisateur['mot_de_passe'])) {
+            if ($utilisateur && password_verify($motDePasse, $utilisateur['mot_de_passe'])) {
             // Connexion réussie : on régénère l'ID de session (sécurité)
             session_regenerate_id(true);
 
@@ -29,6 +29,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['nom']            = $utilisateur['nom'];
             $_SESSION['prenom']         = $utilisateur['prenom'];
             $_SESSION['role']           = $utilisateur['role'];
+
+            // Vérifie les lots proches de l'expiration à l'instant précis de la connexion
+            require_once __DIR__ . '/../includes/functions.php';
+            mettreAJourStatutsLots($pdo);
+            $lotsProches = getLotsExpirationProche($pdo, 30);
+
+            if (!empty($lotsProches)) {
+                $lignes = array_map(
+                    fn($l) => '• ' . htmlspecialchars($l['medicament_nom']) . ' (lot ' . htmlspecialchars($l['numero_lot']) . ') — J-' . (int)$l['jours_restants'],
+                    array_slice($lotsProches, 0, 5)
+                );
+                $message = 'Des lots arrivent bientôt à expiration :<br><br>' . implode('<br>', $lignes);
+                if (count($lotsProches) > 5) {
+                    $message .= '<br><br>… et ' . (count($lotsProches) - 5) . ' autre(s).';
+                }
+                $_SESSION['flash_warning'] = $message;
+            }
 
             header('Location: /dashboard/index.php');
             exit;

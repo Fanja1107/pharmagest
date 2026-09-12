@@ -210,4 +210,25 @@ CREATE TABLE vente_lots (
         FOREIGN KEY (id_lot) REFERENCES lots(id_lot)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- ---------------------------------------------------------
+-- VUE : stock calculé par médicament
+-- ---------------------------------------------------------
+CREATE VIEW vue_stock_medicaments AS
+SELECT
+    m.id_medicament,
+    m.reference,
+    m.nom,
+    m.dosage,
+    m.seuil_alerte,
+    m.statut AS statut_medicament,
+    COALESCE(SUM(CASE WHEN l.statut = 'actif' THEN l.quantite_base ELSE 0 END), 0) AS stock_total,
+    CASE
+        WHEN COALESCE(SUM(CASE WHEN l.statut = 'actif' THEN l.quantite_base ELSE 0 END), 0) = 0 THEN 'rupture'
+        WHEN COALESCE(SUM(CASE WHEN l.statut = 'actif' THEN l.quantite_base ELSE 0 END), 0) <= m.seuil_alerte THEN 'faible'
+        ELSE 'normal'
+    END AS statut_stock
+FROM medicaments m
+LEFT JOIN lots l ON l.id_medicament = m.id_medicament
+GROUP BY m.id_medicament, m.reference, m.nom, m.dosage, m.seuil_alerte, m.statut;
+
 SET FOREIGN_KEY_CHECKS = 1;

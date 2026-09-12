@@ -20,10 +20,15 @@ function alertError(message) {
     });
 }
 
-/**
- * Affiche une confirmation avant suppression.
- * Si confirmé, redirige vers l'URL fournie.
- */
+function alertWarning(message) {
+    Swal.fire({
+        icon: 'warning',
+        title: 'Attention',
+        html: message,
+        confirmButtonText: 'Compris'
+    });
+}
+
 function confirmerSuppression(url, nomElement) {
     Swal.fire({
         title: 'Êtes-vous sûr ?',
