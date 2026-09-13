@@ -13,6 +13,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
         <li><a href="/fournisseurs/index.php" class="<?= str_contains($_SERVER['REQUEST_URI'], '/fournisseurs/') ? 'active' : '' ?>">🚚 Fournisseurs</a></li>
         <li><a href="/approvisionnements/index.php" class="<?= str_contains($_SERVER['REQUEST_URI'], '/approvisionnements/') ? 'active' : '' ?>">📥 Achats</a></li>
         <li><a href="/ventes/index.php" class="<?= str_contains($_SERVER['REQUEST_URI'], '/ventes/') ? 'active' : '' ?>">🧾 Ventes</a></li>
+        <li><a href="/factures/index.php" class="<?= str_contains($_SERVER['REQUEST_URI'], '/factures/') ? 'active' : '' ?>">📄 Factures</a></li>
         <li><a href="/clients/index.php" class="<?= str_contains($_SERVER['REQUEST_URI'], '/clients/') ? 'active' : '' ?>">👥 Clients</a></li>
         <li><a href="/utilisateurs/index.php" class="<?= str_contains($_SERVER['REQUEST_URI'], '/utilisateurs/') ? 'active' : '' ?>">🔐 Utilisateurs</a></li>
         <li><a href="/rapports/index.php" class="<?= str_contains($_SERVER['REQUEST_URI'], '/rapports/') ? 'active' : '' ?>">📈 Rapports</a></li>
