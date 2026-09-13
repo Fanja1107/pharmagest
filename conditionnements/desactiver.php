@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../config/database.php';
-requireConnexion();
+requireRole(['admin', 'pharmacien']);
 
 $id = (int)($_GET['id'] ?? 0);
 $action = $_GET['action'] ?? 'desactiver';

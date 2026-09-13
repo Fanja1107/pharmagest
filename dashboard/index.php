@@ -21,9 +21,53 @@ $nbExpirationProche = (int)$pdo->query("SELECT COUNT(*) FROM vue_expirations WHE
 $nbExpires = (int)$pdo->query("SELECT COUNT(*) FROM vue_expirations WHERE statut = 'expire'")->fetchColumn();
 
 // Ventes / achats — pas encore développés (Phases 6 et 7), on affiche 0 pour l'instant
-$ventesDuJour = 0;
-$ventesDuMois = 0;
-$achatsDuMois = 0;
+// Ventes du jour et du mois (uniquement les ventes validées)
+$ventesDuJour = (float)$pdo->query(
+    "SELECT COALESCE(SUM(total), 0) FROM ventes WHERE statut = 'validee' AND DATE(date_vente) = CURDATE()"
+)->fetchColumn();
+
+$ventesDuMois = (float)$pdo->query(
+    "SELECT COALESCE(SUM(total), 0) FROM ventes WHERE statut = 'validee'
+     AND MONTH(date_vente) = MONTH(CURDATE()) AND YEAR(date_vente) = YEAR(CURDATE())"
+)->fetchColumn();
+
+// Achats du mois (uniquement les approvisionnements validés)
+$achatsDuMois = (float)$pdo->query(
+    "SELECT COALESCE(SUM(total_achat), 0) FROM approvisionnements WHERE statut = 'valide'
+     AND MONTH(date_approvisionnement) = MONTH(CURDATE()) AND YEAR(date_approvisionnement) = YEAR(CURDATE())"
+)->fetchColumn();
+// Ventes des 7 derniers jours (pour le graphique d'évolution)
+$stmt = $pdo->query(
+    "SELECT DATE(date_vente) AS jour, SUM(total) AS total_jour
+     FROM ventes
+     WHERE statut = 'validee' AND date_vente >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+     GROUP BY DATE(date_vente)
+     ORDER BY jour ASC"
+);
+$ventesParJourBrut = $stmt->fetchAll();
+
+// On complète les jours sans vente avec 0, pour avoir toujours 7 points sur le graphique
+$ventesParJour = [];
+for ($i = 6; $i >= 0; $i--) {
+    $jour = date('Y-m-d', strtotime("-$i day"));
+    $ventesParJour[$jour] = 0;
+}
+foreach ($ventesParJourBrut as $ligne) {
+    $ventesParJour[$ligne['jour']] = (float)$ligne['total_jour'];
+}
+
+// Top 5 des médicaments les plus vendus (en quantité de base), toutes ventes validées confondues
+$stmt = $pdo->query(
+    "SELECT m.nom, SUM(vd.quantite_base) AS quantite_totale
+     FROM vente_details vd
+     JOIN ventes v ON v.id_vente = vd.id_vente
+     JOIN medicaments m ON m.id_medicament = vd.id_medicament
+     WHERE v.statut = 'validee'
+     GROUP BY m.id_medicament, m.nom
+     ORDER BY quantite_totale DESC
+     LIMIT 5"
+);
+$topMedicaments = $stmt->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -120,28 +164,97 @@ $achatsDuMois = 0;
                     </a>
                 </div>
 
-                <div class="section-title">💰 Ventes &amp; Achats</div>
+                                <div class="section-title">💰 Ventes &amp; Achats</div>
                 <div class="stats-grid">
-                    <div class="stat-card stat-success">
+                    <a href="/ventes/index.php" class="stat-card stat-success">
                         <div class="stat-label">Ventes du jour</div>
-                        <div class="stat-value"><?= $ventesDuJour ?> Ar</div>
-                    </div>
-                    <div class="stat-card stat-success">
+                        <div class="stat-value"><?= number_format($ventesDuJour, 0, ',', ' ') ?> Ar</div>
+                    </a>
+                    <a href="/ventes/index.php" class="stat-card stat-success">
                         <div class="stat-label">Ventes du mois</div>
-                        <div class="stat-value"><?= $ventesDuMois ?> Ar</div>
+                        <div class="stat-value"><?= number_format($ventesDuMois, 0, ',', ' ') ?> Ar</div>
+                    </a>
+                    <a href="/approvisionnements/index.php" class="stat-card">
+                        <div class="stat-label">Achats du mois</div>
+                        <div class="stat-value"><?= number_format($achatsDuMois, 0, ',', ' ') ?> Ar</div>
+                    </a>
+                </div>
+
+                <div class="section-title">📈 Graphiques</div>
+                <div class="stats-grid" style="grid-template-columns: 1fr 1fr;">
+                    <div class="stat-card">
+                        <div class="stat-label" style="margin-bottom:14px;">Ventes des 7 derniers jours</div>
+                        <canvas id="graphVentes" height="180"></canvas>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-label">Achats du mois</div>
-                        <div class="stat-value"><?= $achatsDuMois ?> Ar</div>
+                        <div class="stat-label" style="margin-bottom:14px;">Top 5 médicaments les plus vendus</div>
+                        <?php if (empty($topMedicaments)): ?>
+                            <p style="color:var(--color-text-muted); font-size:0.85rem;">Aucune vente enregistrée pour le moment.</p>
+                        <?php else: ?>
+                            <canvas id="graphTopMedicaments" height="180"></canvas>
+                        <?php endif; ?>
                     </div>
                 </div>
-                <p style="color:var(--color-text-muted); font-size:0.85rem;">
-                    ℹ️ Les statistiques de ventes et d'achats seront actives une fois les modules correspondants développés (Phases 6 et 7).
-                </p>
             </div>
         </div>
     </div>
 
-    <?php include __DIR__ . '/../includes/footer.php'; ?>
+        <?php include __DIR__ . '/../includes/footer.php'; ?>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+    <script>
+        // Graphique 1 : évolution des ventes sur 7 jours
+        const joursVentes = <?= json_encode(array_keys($ventesParJour)) ?>;
+        const montantsVentes = <?= json_encode(array_values($ventesParJour)) ?>;
+
+        const joursFormates = joursVentes.map(j => {
+            const d = new Date(j);
+            return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' });
+        });
+
+        new Chart(document.getElementById('graphVentes'), {
+            type: 'line',
+            data: {
+                labels: joursFormates,
+                datasets: [{
+                    label: 'Ventes (Ar)',
+                    data: montantsVentes,
+                    borderColor: '#2563eb',
+                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                    fill: true,
+                    tension: 0.3,
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+        <?php if (!empty($topMedicaments)): ?>
+        // Graphique 2 : top médicaments les plus vendus
+        const nomsMedicaments = <?= json_encode(array_column($topMedicaments, 'nom')) ?>;
+        const quantitesMedicaments = <?= json_encode(array_map('intval', array_column($topMedicaments, 'quantite_totale'))) ?>;
+
+        new Chart(document.getElementById('graphTopMedicaments'), {
+            type: 'bar',
+            data: {
+                labels: nomsMedicaments,
+                datasets: [{
+                    label: 'Unités vendues',
+                    data: quantitesMedicaments,
+                    backgroundColor: '#16a34a',
+                }]
+            },
+            options: {
+                responsive: true,
+                indexAxis: 'y',
+                plugins: { legend: { display: false } },
+                scales: { x: { beginAtZero: true } }
+            }
+        });
+        <?php endif; ?>
+    </script>
 </body>
 </html>

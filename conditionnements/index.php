@@ -3,6 +3,8 @@ require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../config/database.php';
 requireConnexion();
 
+$peutGerer = in_array($_SESSION['role'], ['admin', 'pharmacien'], true);
+
 $recherche = trim($_GET['q'] ?? '');
 
 $sql = "SELECT c.*, m.nom AS medicament_nom, u.symbole AS unite_symbole,
@@ -46,7 +48,9 @@ $conditionnements = $stmt->fetchAll();
                         <input type="text" name="q" id="champRecherche" placeholder="Rechercher par médicament ou libellé..."
                                value="<?= htmlspecialchars($recherche) ?>" autocomplete="off">
                     </form>
-                    <a href="/conditionnements/ajouter.php" class="btn btn-primary">+ Ajouter un conditionnement</a>
+                    <?php if ($peutGerer): ?>
+                        <a href="/conditionnements/ajouter.php" class="btn btn-primary">+ Ajouter un conditionnement</a>
+                    <?php endif; ?>
                 </div>
 
                 <div class="table-wrapper">
@@ -116,16 +120,20 @@ $conditionnements = $stmt->fetchAll();
                                             <?php endif; ?>
                                         </td>
                                         <td class="actions-cell">
-                                            <a href="/conditionnements/modifier.php?id=<?= $c['id_conditionnement'] ?>" class="btn btn-outline btn-sm">Modifier</a>
-                                            <?php if ($c['statut'] === 'actif'): ?>
-                                                <button type="button" class="btn-danger-text"
-                                                    onclick="confirmerSuppression('/conditionnements/desactiver.php?id=<?= $c['id_conditionnement'] ?>&action=desactiver', '<?= htmlspecialchars($c['libelle'], ENT_QUOTES) ?>')">
-                                                    Désactiver
-                                                </button>
+                                            <?php if ($peutGerer): ?>
+                                                <a href="/conditionnements/modifier.php?id=<?= $c['id_conditionnement'] ?>" class="btn btn-outline btn-sm">Modifier</a>
+                                                <?php if ($c['statut'] === 'actif'): ?>
+                                                    <button type="button" class="btn-danger-text"
+                                                        onclick="confirmerSuppression('/conditionnements/desactiver.php?id=<?= $c['id_conditionnement'] ?>&action=desactiver', '<?= htmlspecialchars($c['libelle'], ENT_QUOTES) ?>')">
+                                                        Désactiver
+                                                    </button>
+                                                <?php else: ?>
+                                                    <a href="/conditionnements/desactiver.php?id=<?= $c['id_conditionnement'] ?>&action=activer" class="btn-danger-text" style="color:var(--color-success);">
+                                                        Réactiver
+                                                    </a>
+                                                <?php endif; ?>
                                             <?php else: ?>
-                                                <a href="/conditionnements/desactiver.php?id=<?= $c['id_conditionnement'] ?>&action=activer" class="btn-danger-text" style="color:var(--color-success);">
-                                                    Réactiver
-                                                </a>
+                                                <span style="color:var(--color-text-muted); font-size:0.8rem;">Lecture seule</span>
                                             <?php endif; ?>
                                         </td>
                                     </tr>

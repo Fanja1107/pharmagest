@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../config/database.php';
-requireConnexion();
+requireRole(['admin', 'pharmacien']);
 
 $recherche = trim($_GET['q'] ?? '');
 

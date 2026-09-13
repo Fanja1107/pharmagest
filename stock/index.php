@@ -4,6 +4,8 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/functions.php';
 requireConnexion();
 
+$peutGerer = in_array($_SESSION['role'], ['admin', 'pharmacien'], true);
+
 mettreAJourStatutsLots($pdo);
 
 $recherche = trim($_GET['q'] ?? '');
@@ -69,7 +71,9 @@ $stocks = $stmt->fetchAll();
                             <option value="rupture" <?= $statutFiltre === 'rupture' ? 'selected' : '' ?>>Rupture</option>
                         </select>
                     </form>
-                    <a href="/lots/ajouter.php" class="btn btn-primary">+ Ajouter un lot</a>
+                    <?php if ($peutGerer): ?>
+                        <a href="/lots/ajouter.php" class="btn btn-primary">+ Ajouter un lot</a>
+                    <?php endif; ?>
                 </div>
 
                 <div class="table-wrapper">

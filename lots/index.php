@@ -4,6 +4,8 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../includes/functions.php';
 requireConnexion();
 
+$peutGerer = in_array($_SESSION['role'], ['admin', 'pharmacien'], true);
+
 mettreAJourStatutsLots($pdo);
 
 $recherche = trim($_GET['q'] ?? '');
@@ -76,7 +78,9 @@ $lots = $stmt->fetchAll();
                             <option value="epuise" <?= $statutFiltre === 'epuise' ? 'selected' : '' ?>>Épuisé</option>
                         </select>
                     </form>
-                    <a href="/lots/ajouter.php" class="btn btn-primary">+ Ajouter un lot</a>
+                    <?php if ($peutGerer): ?>
+                        <a href="/lots/ajouter.php" class="btn btn-primary">+ Ajouter un lot</a>
+                    <?php endif; ?>
                 </div>
 
                 <div class="table-wrapper">
@@ -122,11 +126,15 @@ $lots = $stmt->fetchAll();
                                             <span class="badge <?= $badgeClass ?>"><?= ucfirst($l['statut']) ?></span>
                                         </td>
                                         <td class="actions-cell">
-                                            <a href="/lots/modifier.php?id=<?= $l['id_lot'] ?>" class="btn btn-outline btn-sm">Modifier</a>
-                                            <button type="button" class="btn-danger-text"
-                                                onclick="confirmerSuppression('/lots/supprimer.php?id=<?= $l['id_lot'] ?>', '<?= htmlspecialchars($l['numero_lot'], ENT_QUOTES) ?>')">
-                                                Supprimer
-                                            </button>
+                                            <?php if ($peutGerer): ?>
+                                                <a href="/lots/modifier.php?id=<?= $l['id_lot'] ?>" class="btn btn-outline btn-sm">Modifier</a>
+                                                <button type="button" class="btn-danger-text"
+                                                    onclick="confirmerSuppression('/lots/supprimer.php?id=<?= $l['id_lot'] ?>', '<?= htmlspecialchars($l['numero_lot'], ENT_QUOTES) ?>')">
+                                                    Supprimer
+                                                </button>
+                                            <?php else: ?>
+                                                <span style="color:var(--color-text-muted); font-size:0.8rem;">Lecture seule</span>
+                                            <?php endif; ?>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>

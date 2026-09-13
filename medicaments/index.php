@@ -3,6 +3,8 @@ require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../config/database.php';
 requireConnexion();
 
+$peutGerer = in_array($_SESSION['role'], ['admin', 'pharmacien'], true);
+
 $recherche = trim($_GET['q'] ?? '');
 
 $sql = 'SELECT m.*, c.libelle AS categorie_libelle
@@ -44,7 +46,9 @@ $medicaments = $stmt->fetchAll();
                         <input type="text" name="q" id="champRecherche" placeholder="Rechercher par nom ou référence..."
                                value="<?= htmlspecialchars($recherche) ?>" autocomplete="off">
                     </form>
-                    <a href="/medicaments/ajouter.php" class="btn btn-primary">+ Ajouter un médicament</a>
+                    <?php if ($peutGerer): ?>
+                        <a href="/medicaments/ajouter.php" class="btn btn-primary">+ Ajouter un médicament</a>
+                    <?php endif; ?>
                 </div>
 
                 <div class="table-wrapper">
@@ -79,16 +83,20 @@ $medicaments = $stmt->fetchAll();
                                             <?php endif; ?>
                                         </td>
                                         <td class="actions-cell">
-                                            <a href="/medicaments/modifier.php?id=<?= $m['id_medicament'] ?>" class="btn btn-outline btn-sm">Modifier</a>
-                                            <?php if ($m['statut'] === 'actif'): ?>
-                                                <button type="button" class="btn-danger-text"
-                                                    onclick="confirmerSuppression('/medicaments/desactiver.php?id=<?= $m['id_medicament'] ?>&action=desactiver', '<?= htmlspecialchars($m['nom'], ENT_QUOTES) ?>')">
-                                                    Désactiver
-                                                </button>
+                                            <?php if ($peutGerer): ?>
+                                                <a href="/medicaments/modifier.php?id=<?= $m['id_medicament'] ?>" class="btn btn-outline btn-sm">Modifier</a>
+                                                <?php if ($m['statut'] === 'actif'): ?>
+                                                    <button type="button" class="btn-danger-text"
+                                                        onclick="confirmerSuppression('/medicaments/desactiver.php?id=<?= $m['id_medicament'] ?>&action=desactiver', '<?= htmlspecialchars($m['nom'], ENT_QUOTES) ?>')">
+                                                        Désactiver
+                                                    </button>
+                                                <?php else: ?>
+                                                    <a href="/medicaments/desactiver.php?id=<?= $m['id_medicament'] ?>&action=activer" class="btn-danger-text" style="color:var(--color-success);">
+                                                        Réactiver
+                                                    </a>
+                                                <?php endif; ?>
                                             <?php else: ?>
-                                                <a href="/medicaments/desactiver.php?id=<?= $m['id_medicament'] ?>&action=activer" class="btn-danger-text" style="color:var(--color-success);">
-                                                    Réactiver
-                                                </a>
+                                                <span style="color:var(--color-text-muted); font-size:0.8rem;">Lecture seule</span>
                                             <?php endif; ?>
                                         </td>
                                     </tr>

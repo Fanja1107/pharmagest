@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../config/database.php';
-requireConnexion();
+requireRole(['admin', 'pharmacien']);
 
 $medicaments = $pdo->query("SELECT * FROM medicaments WHERE statut = 'actif' ORDER BY nom")->fetchAll();
 $unites = $pdo->query('SELECT * FROM unites ORDER BY nom_unite')->fetchAll();
