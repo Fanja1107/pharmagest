@@ -19,6 +19,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $erreur = 'Médicament, numéro de lot, date d\'expiration, quantité et prix sont obligatoires (quantité et prix > 0).';
     } elseif (strtotime($dateExpiration) < strtotime(date('Y-m-d'))) {
         $erreur = 'La date d\'expiration ne peut pas être dans le passé.';
+    } elseif ($dateFabrication !== '' && strtotime($dateFabrication) > strtotime(date('Y-m-d'))) {
+        $erreur = 'La date de fabrication ne peut pas être dans le futur.';
+    } elseif ($dateFabrication !== '' && strtotime($dateFabrication) > strtotime($dateExpiration)) {
+        $erreur = 'La date de fabrication ne peut pas être postérieure à la date d\'expiration.';
     } else {
         $stmt = $pdo->prepare(
             'INSERT INTO lots (id_medicament, numero_lot, date_fabrication, date_expiration, quantite_base, prix_achat_base)

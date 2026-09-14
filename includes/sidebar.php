@@ -9,6 +9,10 @@ $estAdmin = ($_SESSION['role'] ?? '') === 'admin';
     <ul class="sidebar-nav">
         <li><a href="/dashboard/index.php" class="<?= str_contains($_SERVER['REQUEST_URI'], '/dashboard/') ? 'active' : '' ?>">📊 Dashboard</a></li>
         <li><a href="/medicaments/index.php" class="<?= str_contains($_SERVER['REQUEST_URI'], '/medicaments/') ? 'active' : '' ?>">💊 Médicaments</a></li>
+        <?php if ($peutGererStock): ?>
+            <li><a href="/categories/index.php" class="<?= str_contains($_SERVER['REQUEST_URI'], '/categories/') ? 'active' : '' ?>">🗂️ Catégories</a></li>
+            <li><a href="/unites/index.php" class="<?= str_contains($_SERVER['REQUEST_URI'], '/unites/') ? 'active' : '' ?>">📏 Unités</a></li>
+        <?php endif; ?>
         <li><a href="/conditionnements/index.php" class="<?= str_contains($_SERVER['REQUEST_URI'], '/conditionnements/') ? 'active' : '' ?>">🏷️ Conditionnements</a></li>
         <li><a href="/lots/index.php" class="<?= str_contains($_SERVER['REQUEST_URI'], '/lots/') ? 'active' : '' ?>">📋 Lots</a></li>
         <li><a href="/stock/index.php" class="<?= str_contains($_SERVER['REQUEST_URI'], '/stock/') ? 'active' : '' ?>">📦 Stock</a></li>

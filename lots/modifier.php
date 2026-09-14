@@ -29,6 +29,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($idMedicament === 0 || $numeroLot === '' || $dateExpiration === '' || $quantiteBase < 0 || $prixAchatBase <= 0) {
         $erreur = 'Médicament, numéro de lot, date d\'expiration et prix sont obligatoires.';
+    } elseif ($dateFabrication !== '' && strtotime($dateFabrication) > strtotime(date('Y-m-d'))) {
+        $erreur = 'La date de fabrication ne peut pas être dans le futur.';
+    } elseif ($dateFabrication !== '' && strtotime($dateFabrication) > strtotime($dateExpiration)) {
+        $erreur = 'La date de fabrication ne peut pas être postérieure à la date d\'expiration.';
     } else {
         $stmt = $pdo->prepare(
             'UPDATE lots
