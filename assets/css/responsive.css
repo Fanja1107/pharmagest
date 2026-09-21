@@ -8,11 +8,8 @@
     }
 
     .sidebar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        height: 100vh;
         transform: translateX(-100%);
+        transition: transform 0.3s ease;
         z-index: 1000;
     }
 
@@ -20,7 +17,28 @@
         transform: translateX(0);
     }
 
+    .main-content {
+        margin-left: 0;
+    }
+
+    .topbar {
+        left: 0;
+    }
+
     .app-layout {
         position: relative;
+    }
+
+    /* Sur mobile, on retrouve le scroll horizontal pour les tableaux larges */
+    .table-wrapper {
+        overflow-x: auto;
+    }
+
+    .table-toolbar {
+        top: 60px;
+    }
+
+    table.data-table thead th {
+        top: 118px;
     }
 }

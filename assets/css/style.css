@@ -466,3 +466,54 @@ table.data-table tbody tr:hover {
         height: 42px;
     }
 }
+
+/* =========================================================
+   SIDEBAR, HEADER ET TABLEAUX FIXES AU SCROLL
+   ========================================================= */
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 900;
+}
+
+.main-content {
+    margin-left: var(--sidebar-width);
+}
+
+.topbar {
+    position: fixed;
+    top: 0;
+    left: var(--sidebar-width);
+    right: 0;
+    z-index: 800;
+}
+
+.page-content {
+    padding-top: calc(24px + 60px);
+}
+
+/* Sur desktop, pas de scroll horizontal propre au tableau : ça évite de casser le sticky */
+.table-wrapper {
+    overflow-x: visible;
+}
+
+/* La barre recherche + bouton "Ajouter" reste collée sous le header */
+.table-toolbar {
+    position: sticky;
+    top: 60px;
+    z-index: 20;
+    background: var(--color-bg);
+    padding: 14px 0;
+    margin-bottom: 0;
+}
+
+/* L'en-tête du tableau reste collé juste sous la barre de recherche */
+table.data-table thead th {
+    position: sticky;
+    top: 126px;
+    z-index: 15;
+}
