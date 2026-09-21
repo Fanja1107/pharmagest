@@ -44,3 +44,21 @@ function confirmerSuppression(url, nomElement) {
         }
     });
 }
+/**
+ * Confirmation générique pour une action non destructive (ex. réinitialisation).
+ */
+function confirmerAction(url, titre, texte) {
+    Swal.fire({
+        title: titre,
+        text: texte,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Oui, continuer',
+        cancelButtonText: 'Annuler',
+        confirmButtonColor: '#2563eb'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = url;
+        }
+    });
+}

@@ -25,10 +25,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Connexion réussie : on régénère l'ID de session (sécurité)
             session_regenerate_id(true);
 
-            $_SESSION['id_utilisateur'] = $utilisateur['id_utilisateur'];
-            $_SESSION['nom']            = $utilisateur['nom'];
-            $_SESSION['prenom']         = $utilisateur['prenom'];
-            $_SESSION['role']           = $utilisateur['role'];
+            $_SESSION['id_utilisateur']  = $utilisateur['id_utilisateur'];
+            $_SESSION['nom']             = $utilisateur['nom'];
+            $_SESSION['prenom']          = $utilisateur['prenom'];
+            $_SESSION['role']            = $utilisateur['role'];
+            $_SESSION['doit_changer_mdp'] = (bool)$utilisateur['doit_changer_mdp'];
 
             // Vérifie les lots proches de l'expiration à l'instant précis de la connexion
             require_once __DIR__ . '/../includes/functions.php';

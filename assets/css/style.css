@@ -267,3 +267,202 @@ table.data-table tbody tr:hover {
     .table-toolbar { flex-direction: column; align-items: stretch; }
     .table-toolbar input[type="text"] { min-width: 0; width: 100%; }
 }
+
+/* ---------- SIDEBAR : logout fixé en bas ---------- */
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.sidebar-bottom {
+    padding-bottom: 16px;
+}
+.sidebar-logout {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px var(--spacing);
+    color: #fca5a5;
+    font-size: 0.92rem;
+}
+.sidebar-logout:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+    color: #fff;
+}
+
+/* ---------- TOPBAR USER (Mon compte) ---------- */
+.topbar-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 6px 12px 6px 6px;
+    border-radius: 999px;
+    transition: background-color 0.15s ease;
+}
+.topbar-user:hover {
+    background-color: #f1f5f9;
+}
+.topbar-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.topbar-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* ---------- MODALE (réutilisable) ---------- */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.5);
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 16px;
+}
+.modal-overlay.open { display: flex; }
+.modal-box {
+    background: #fff;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 460px;
+    padding: 24px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+.modal-box h3 { margin-top: 0; margin-bottom: 18px; }
+.modal-actions, .form-actions { display: flex; gap: 10px; margin-top: 20px; }
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 1.3rem;
+    cursor: pointer;
+    float: right;
+    color: var(--color-text-muted);
+    line-height: 1;
+}
+.modal-section-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    margin: 24px 0 12px;
+    border-top: 1px solid var(--color-border);
+    padding-top: 18px;
+}
+.modal-box .form-group { margin-bottom: 14px; }
+.modal-box .form-group label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 0.85rem; }
+.modal-box .form-group input {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    font-family: inherit;
+}
+.modal-box .form-group input:disabled {
+    background: #f1f5f9;
+    color: var(--color-text-muted);
+    cursor: not-allowed;
+}
+
+/* ---------- TOGGLE SWITCH ---------- */
+.toggle-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.toggle-switch { position: relative; width: 44px; height: 24px; flex-shrink: 0; }
+.toggle-switch input { opacity: 0; width: 0; height: 0; }
+.toggle-slider {
+    position: absolute; cursor: pointer; inset: 0;
+    background-color: #cbd5e1; transition: 0.2s; border-radius: 999px;
+}
+.toggle-slider:before {
+    position: absolute; content: ""; height: 18px; width: 18px;
+    left: 3px; bottom: 3px; background-color: white; transition: 0.2s; border-radius: 50%;
+}
+.toggle-switch input:checked + .toggle-slider { background-color: var(--color-primary); }
+.toggle-switch input:checked + .toggle-slider:before { transform: translateX(20px); }
+
+/* ---------- SÉLECTEUR D'AVATAR ---------- */
+.avatar-picker { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+.avatar-option {
+    border: 2px solid transparent; border-radius: 50%; cursor: pointer;
+    padding: 2px; opacity: 0.55; transition: 0.15s;
+}
+.avatar-option.selected { border-color: var(--color-primary); opacity: 1; }
+.avatar-option.disabled { pointer-events: none; opacity: 0.35; }
+/* Correction : forcer le bloc Mon compte à droite du header, peu importe le hamburger */
+.topbar-user { margin-left: auto; }
+
+/* ---------- ONGLETS MON COMPTE ---------- */
+.mc-tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: 20px;
+}
+.mc-tab {
+    padding: 10px 16px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    margin-bottom: -1px;
+}
+.mc-tab.active {
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
+}
+.mc-tab-content { display: none; }
+.mc-tab-content.active { display: block; }
+/* ---------- BOUTON RETOUR EN HAUT ---------- */
+#btnRetourHaut {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: #fff;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: opacity 0.2s ease, transform 0.2s ease, background-color 0.15s ease;
+    z-index: 500;
+}
+#btnRetourHaut.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+#btnRetourHaut:hover {
+    background: var(--color-primary-dark);
+}
+#btnRetourHaut svg {
+    width: 20px;
+    height: 20px;
+}
+
+@media (max-width: 768px) {
+    #btnRetourHaut {
+        bottom: 16px;
+        right: 16px;
+        width: 42px;
+        height: 42px;
+    }
+}

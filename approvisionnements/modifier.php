@@ -74,6 +74,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 break;
             }
 
+            if (strtotime($dateExp) < strtotime(date('Y-m-d'))) {
+                $erreur = 'Ligne ' . ($i + 1) . ' : la date d\'expiration ne peut pas être dans le passé.';
+                break;
+            }
+
+            if ($dateFab !== '' && strtotime($dateFab) > strtotime(date('Y-m-d'))) {
+                $erreur = 'Ligne ' . ($i + 1) . ' : la date de fabrication ne peut pas être dans le futur.';
+                break;
+            }
+
+            if ($dateFab !== '' && strtotime($dateFab) > strtotime($dateExp)) {
+                $erreur = 'Ligne ' . ($i + 1) . ' : la date de fabrication ne peut pas être postérieure à la date d\'expiration.';
+                break;
+            }
+
             if (!isset($conditionnementsById[$idCond])) {
                 $erreur = 'Conditionnement invalide.';
                 break;
@@ -224,6 +239,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         const medicaments = <?= json_encode($medicaments) ?>;
         const conditionnements = <?= json_encode($conditionnementsData) ?>;
         const lignesExistantes = <?= json_encode($lignesExistantes) ?>;
+        const aujourdHui = new Date().toISOString().split('T')[0];
 
         function optionsMedicaments(idSelectionne) {
             return medicaments.map(m =>
@@ -242,6 +258,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ).join('');
         }
 
+        function synchroniserDates(inputDateFab, inputDateExp) {
+            if (inputDateExp.value) {
+                inputDateFab.max = inputDateExp.value < aujourdHui ? inputDateExp.value : aujourdHui;
+            } else {
+                inputDateFab.max = aujourdHui;
+            }
+
+            if (inputDateFab.value) {
+                inputDateExp.min = inputDateFab.value > aujourdHui ? inputDateFab.value : aujourdHui;
+            } else {
+                inputDateExp.min = aujourdHui;
+            }
+        }
+
         function ajouterLigne(donnees = null) {
             const tbody = document.querySelector('#tableLignes tbody');
             const tr = document.createElement('tr');
@@ -258,8 +288,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </td>
                 <td><select name="id_conditionnement[]" class="select-conditionnement" required>${optionsConditionnements(idMedSelectionne, idCondSelectionne)}</select></td>
                 <td><input type="text" name="numero_lot[]" required value="${donnees ? donnees.numero_lot : ''}"></td>
-                <td><input type="date" name="date_fabrication[]" value="${donnees && donnees.date_fabrication ? donnees.date_fabrication : ''}"></td>
-                <td><input type="date" name="date_expiration[]" required value="${donnees ? donnees.date_expiration : ''}"></td>
+                <td><input type="date" name="date_fabrication[]" class="input-date-fabrication" max="${aujourdHui}" value="${donnees && donnees.date_fabrication ? donnees.date_fabrication : ''}"></td>
+                <td><input type="date" name="date_expiration[]" class="input-date-expiration" min="${aujourdHui}" required value="${donnees ? donnees.date_expiration : ''}"></td>
                 <td><input type="number" name="quantite[]" class="input-quantite" min="1" required value="${donnees ? donnees.quantite : ''}"></td>
                 <td><input type="number" name="prix_achat[]" class="input-prix" min="0" step="0.01" required value="${donnees ? donnees.prix_achat : ''}"></td>
                 <td class="sous-total">${donnees ? Number(donnees.sous_total).toLocaleString('fr-FR') : '0'}</td>
@@ -271,11 +301,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const selectCond = tr.querySelector('.select-conditionnement');
             const inputQte = tr.querySelector('.input-quantite');
             const inputPrix = tr.querySelector('.input-prix');
+            const inputDateFab = tr.querySelector('.input-date-fabrication');
+            const inputDateExp = tr.querySelector('.input-date-expiration');
             const sousTotalCell = tr.querySelector('.sous-total');
 
             selectMed.addEventListener('change', () => {
                 selectCond.innerHTML = optionsConditionnements(selectMed.value, '');
             });
+
+            inputDateFab.addEventListener('change', () => synchroniserDates(inputDateFab, inputDateExp));
+            inputDateExp.addEventListener('change', () => synchroniserDates(inputDateFab, inputDateExp));
+
+            // Applique la synchro tout de suite si des dates sont déjà pré-remplies (cas édition)
+            synchroniserDates(inputDateFab, inputDateExp);
 
             function recalculerLigne() {
                 const qte = parseFloat(inputQte.value) || 0;

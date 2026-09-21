@@ -24,11 +24,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $hash = password_hash($motDePasse, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare(
-                'INSERT INTO utilisateurs (nom, prenom, email, mot_de_passe, role) VALUES (?, ?, ?, ?, ?)'
+                'INSERT INTO utilisateurs (nom, prenom, email, mot_de_passe, role, doit_changer_mdp) VALUES (?, ?, ?, ?, ?, 1)'
             );
             $stmt->execute([$nom, $prenom ?: null, $email, $hash, $role]);
 
-            $_SESSION['flash_success'] = 'Utilisateur ajouté avec succès.';
+            $_SESSION['flash_success'] = 'Utilisateur ajouté avec succès. Il devra changer son mot de passe à sa première connexion.';
             header('Location: /utilisateurs/index.php');
             exit;
         } catch (PDOException $e) {

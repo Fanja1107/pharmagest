@@ -1,7 +1,10 @@
 <?php
 require_once __DIR__ . '/../includes/auth.php';
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/../includes/functions.php';
 requireRole(['admin']);
+
+$idAdminPrincipal = getIdAdminPrincipal($pdo);
 
 $recherche = trim($_GET['q'] ?? '');
 
@@ -71,7 +74,15 @@ $utilisateurs = $stmt->fetchAll();
                                         </td>
                                         <td class="actions-cell">
                                             <a href="/utilisateurs/modifier.php?id=<?= $u['id_utilisateur'] ?>" class="btn btn-outline btn-sm">Modifier</a>
-                                            <?php if ($u['id_utilisateur'] != $_SESSION['id_utilisateur']): // on ne peut pas se désactiver soi-même ?>
+                                            <?php if ($u['id_utilisateur'] == $_SESSION['id_utilisateur']): ?>
+                                                <span style="color:var(--color-text-muted); font-size:0.8rem;">(vous)</span>
+                                            <?php elseif ($u['id_utilisateur'] === $idAdminPrincipal): ?>
+                                                <span style="color:var(--color-text-muted); font-size:0.8rem;" title="Ce compte est le propriétaire du système, protégé contre la désactivation par un autre admin.">🔒 Protégé</span>
+                                            <?php else: ?>
+                                                <button type="button" class="btn-outline btn-sm"
+                                                    onclick="confirmerAction('/utilisateurs/reinitialiser-mdp.php?id=<?= $u['id_utilisateur'] ?>', 'Réinitialiser le mot de passe ?', 'Un nouveau mot de passe temporaire sera généré et affiché une seule fois. L\'utilisateur devra le changer à sa prochaine connexion.')">
+                                                    Réinitialiser MDP
+                                                </button>
                                                 <?php if ($u['statut'] === 'actif'): ?>
                                                     <button type="button" class="btn-danger-text"
                                                         onclick="confirmerSuppression('/utilisateurs/desactiver.php?id=<?= $u['id_utilisateur'] ?>&action=desactiver', '<?= htmlspecialchars($u['nom'], ENT_QUOTES) ?>')">
@@ -82,8 +93,6 @@ $utilisateurs = $stmt->fetchAll();
                                                         Réactiver
                                                     </a>
                                                 <?php endif; ?>
-                                            <?php else: ?>
-                                                <span style="color:var(--color-text-muted); font-size:0.8rem;">(vous)</span>
                                             <?php endif; ?>
                                         </td>
                                     </tr>

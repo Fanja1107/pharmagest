@@ -93,6 +93,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 break;
             }
 
+            if (strtotime($dateExp) < strtotime(date('Y-m-d'))) {
+                $erreur = 'Ligne ' . ($i + 1) . ' : la date d\'expiration ne peut pas être dans le passé.';
+                break;
+            }
+
+            if ($dateFab !== '' && strtotime($dateFab) > strtotime(date('Y-m-d'))) {
+                $erreur = 'Ligne ' . ($i + 1) . ' : la date de fabrication ne peut pas être dans le futur.';
+                break;
+            }
+
+            if ($dateFab !== '' && strtotime($dateFab) > strtotime($dateExp)) {
+                $erreur = 'Ligne ' . ($i + 1) . ' : la date de fabrication ne peut pas être postérieure à la date d\'expiration.';
+                break;
+            }
+
             if (!isset($conditionnementsById[$idCond])) {
                 $erreur = 'Conditionnement invalide.';
                 break;
@@ -472,12 +487,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 Enregistrer le brouillon
                             </button>
 
-                            <a
-                                href="/approvisionnements/index.php"
-                                class="btn btn-outline"
-                            >
-                                Annuler
-                            </a>
+                            <a href="/approvisionnements/index.php"  class="btn btn-outline">Annuler</a>
 
                         </div>
 
@@ -507,6 +517,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
         let compteurLigne = 0;
+
+        // Date du jour au format YYYY-MM-DD, pour brider les champs date côté navigateur
+        const aujourdHui = new Date().toISOString().split('T')[0];
 
 
         /*
@@ -649,6 +662,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input
                         type="date"
                         name="date_fabrication[]"
+                        max="${aujourdHui}"
+                        class="input-date-fabrication"
                     >
 
                 </td>
@@ -659,6 +674,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input
                         type="date"
                         name="date_expiration[]"
+                        min="${aujourdHui}"
+                        class="input-date-expiration"
                         required
                     >
 
@@ -770,6 +787,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             const inputPrix =
                 tr.querySelector('.input-prix');
 
+            const inputDateFab =
+                tr.querySelector('.input-date-fabrication');
+
+            const inputDateExp =
+                tr.querySelector('.input-date-expiration');
+
             const sousTotalCell =
                 tr.querySelector('.sous-total');
 
@@ -784,6 +807,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     optionsConditionnements(selectMed.value);
 
             });
+
+
+            /*
+             * Cohérence des dates : la date de fabrication
+             * ne peut pas dépasser la date d'expiration saisie
+             */
+
+            function synchroniserDates() {
+
+                if (inputDateExp.value) {
+                    inputDateFab.max = inputDateExp.value < aujourdHui
+                        ? inputDateExp.value
+                        : aujourdHui;
+                } else {
+                    inputDateFab.max = aujourdHui;
+                }
+
+                if (inputDateFab.value) {
+                    inputDateExp.min = inputDateFab.value > aujourdHui
+                        ? inputDateFab.value
+                        : aujourdHui;
+                } else {
+                    inputDateExp.min = aujourdHui;
+                }
+            }
+
+            inputDateFab.addEventListener('change', synchroniserDates);
+            inputDateExp.addEventListener('change', synchroniserDates);
 
 
             /*

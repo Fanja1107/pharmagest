@@ -26,6 +26,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $rolesValides = ['admin', 'pharmacien', 'vendeur'];
 
+    require_once __DIR__ . '/../includes/functions.php';
+    $idAdminPrincipal = getIdAdminPrincipal($pdo);
+
     if ($nom === '' || $email === '') {
         $erreur = 'Le nom et l\'email sont obligatoires.';
     } elseif (!in_array($role, $rolesValides, true)) {
@@ -34,12 +37,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $erreur = 'Le nouveau mot de passe doit contenir au moins 6 caractères.';
     } elseif ($id == $_SESSION['id_utilisateur'] && $role !== 'admin') {
         $erreur = 'Vous ne pouvez pas retirer votre propre rôle admin.';
+    } elseif ($id === $idAdminPrincipal && $role !== 'admin' && $id != $_SESSION['id_utilisateur']) {
+        $erreur = 'Ce compte est le propriétaire du système : son rôle ne peut être modifié que par lui-même.';
     } else {
         try {
             if ($nouveauMotDePasse !== '') {
                 $hash = password_hash($nouveauMotDePasse, PASSWORD_DEFAULT);
                 $stmt = $pdo->prepare(
-                    'UPDATE utilisateurs SET nom = ?, prenom = ?, email = ?, role = ?, mot_de_passe = ? WHERE id_utilisateur = ?'
+                    'UPDATE utilisateurs SET nom = ?, prenom = ?, email = ?, role = ?, mot_de_passe = ?, doit_changer_mdp = 1 WHERE id_utilisateur = ?'
                 );
                 $stmt->execute([$nom, $prenom ?: null, $email, $role, $hash, $id]);
             } else {
